@@ -38,6 +38,7 @@ public class App extends Application {
     private final OpenAiSummaryService summaryService = new OpenAiSummaryService(config.getOpenAiApiKey(), config.getOpenAiModel());
 
     private ComboBox<String> topicComboBox;
+    private Label connectionLabel;
     private Label headerLabel;
     private Label statusLabel;
     private TextArea summaryArea;
@@ -61,10 +62,15 @@ public class App extends Application {
         stage.setScene(scene);
         stage.show();
 
+        runConnectionTest();
         loadActs();
     }
 
     private VBox buildContentArea() {
+        connectionLabel = new Label("Trwa test połączenia z ISAP...");
+        connectionLabel.setWrapText(true);
+        connectionLabel.setStyle("-fx-text-fill: #555;");
+
         headerLabel = new Label("Ładuję projekty ustaw...");
         headerLabel.setWrapText(true);
         headerLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
@@ -82,7 +88,7 @@ public class App extends Application {
         summaryProgress = new ProgressIndicator();
         summaryProgress.setVisible(false);
 
-        VBox contentBox = new VBox(12, headerLabel, statusLabel, new Separator());
+        VBox contentBox = new VBox(12, connectionLabel, headerLabel, statusLabel, new Separator());
         contentBox.getChildren().add(summaryProgress);
 
         ScrollPane scrollPane = new ScrollPane(summaryArea);
@@ -162,6 +168,39 @@ public class App extends Application {
         });
 
         Thread thread = new Thread(loadTask);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void runConnectionTest() {
+        if (connectionLabel != null) {
+            connectionLabel.setText("Trwa test połączenia z ISAP...");
+            connectionLabel.setStyle("-fx-text-fill: #555;");
+        }
+        Task<IsapApiClient.ConnectionTestResult> testTask = new Task<>() {
+            @Override
+            protected IsapApiClient.ConnectionTestResult call() {
+                return isapApiClient.performConnectionTest();
+            }
+        };
+
+        testTask.setOnSucceeded(event -> {
+            IsapApiClient.ConnectionTestResult result = testTask.getValue();
+            if (connectionLabel != null) {
+                connectionLabel.setStyle(result.success() ? "-fx-text-fill: #2f7d32;" : "-fx-text-fill: #c62828;");
+                connectionLabel.setText(result.message());
+            }
+        });
+
+        testTask.setOnFailed(event -> {
+            if (connectionLabel != null) {
+                connectionLabel.setStyle("-fx-text-fill: #c62828;");
+                Throwable error = testTask.getException();
+                connectionLabel.setText("Test połączenia nie powiódł się: " + (error != null ? error.getMessage() : "nieznany błąd"));
+            }
+        });
+
+        Thread thread = new Thread(testTask);
         thread.setDaemon(true);
         thread.start();
     }
