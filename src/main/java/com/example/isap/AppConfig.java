@@ -11,12 +11,12 @@ public class AppConfig {
     private final Properties properties = new Properties();
 
     public AppConfig() {
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
-            if (input != null) {
-                properties.load(input);
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot load application.properties", e);
+        this(loadFromResource());
+    }
+
+    AppConfig(Properties properties) {
+        if (properties != null) {
+            this.properties.putAll(properties);
         }
     }
 
@@ -46,10 +46,30 @@ public class AppConfig {
 
     public int getLimit() {
         String limitValue = properties.getProperty("isap.limit", "30");
+        if (limitValue == null) {
+            return 30;
+        }
+        String trimmed = limitValue.trim();
+        if (trimmed.isEmpty()) {
+            return 30;
+        }
         try {
-            return Integer.parseInt(limitValue);
+            int parsed = Integer.parseInt(trimmed);
+            return parsed > 0 ? parsed : 30;
         } catch (NumberFormatException ex) {
             return 30;
         }
+    }
+
+    private static Properties loadFromResource() {
+        Properties loaded = new Properties();
+        try (InputStream input = AppConfig.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (input != null) {
+                loaded.load(input);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot load application.properties", e);
+        }
+        return loaded;
     }
 }
