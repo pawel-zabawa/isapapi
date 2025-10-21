@@ -4,12 +4,26 @@ import com.example.isap.model.Act;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class ActFeedService {
+    private static final List<String> DEFAULT_TOPICS = List.of(
+            "Administracja publiczna",
+            "Bezpieczeństwo i obrona",
+            "Budżet i finanse",
+            "Edukacja",
+            "Ochrona zdrowia",
+            "Ochrona środowiska",
+            "Polityka społeczna",
+            "Prawo cywilne",
+            "Prawo pracy",
+            "Transport i infrastruktura"
+    );
+
     private final IsapApiClient apiClient;
     private final ActContentService contentService;
 
@@ -36,7 +50,13 @@ public class ActFeedService {
     }
 
     public List<String> availableTopics() {
-        return apiClient.collectKeywords(cachedActs);
+        LinkedHashSet<String> combined = new LinkedHashSet<>();
+        DEFAULT_TOPICS.stream()
+                .map(String::trim)
+                .filter(topic -> !topic.isBlank())
+                .forEach(combined::add);
+        apiClient.collectKeywords(cachedActs).forEach(combined::add);
+        return List.copyOf(combined);
     }
 
     public Optional<Act> nextAct(int index, String selectedKeyword) {

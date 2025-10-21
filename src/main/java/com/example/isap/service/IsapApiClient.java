@@ -55,19 +55,59 @@ public class IsapApiClient {
         if (detail == null || detail.isMissingNode()) {
             return Optional.empty();
         }
+        return Optional.of(buildActFromDetail(detail, publisher, year, position,
+                listItem.path("title").asText(null),
+                listItem.path("status").asText(""),
+                listItem.path("inForce").asText(""),
+                listItem.path("type").asText("")));
+    }
+
+    public Optional<Act> fetchAct(String publisher, int year, int position) throws IOException, InterruptedException {
+        String detailUrl = String.format("%s/%s/%d/%d", BASE_URL, publisher, year, position);
+        JsonNode detail = executeRequest(detailUrl);
+        if (detail == null || detail.isMissingNode()) {
+            return Optional.empty();
+        }
+        return Optional.of(buildActFromDetail(detail, publisher, year, position, null, "", "", ""));
+    }
+
+    private Act buildActFromDetail(JsonNode detail, String publisher, int year, int position,
+                                   String fallbackTitle, String fallbackStatus, String fallbackInForce, String fallbackType) {
         String eli = detail.path("ELI").asText(null);
-        String title = detail.path("title").asText(listItem.path("title").asText(null));
-        String status = detail.path("status").asText(listItem.path("status").asText(""));
-        String inForce = detail.path("inForce").asText(listItem.path("inForce").asText(""));
-        String type = detail.path("type").asText(listItem.path("type").asText(""));
+        String title = detail.path("title").asText(fallbackTitle);
+        String status = detail.path("status").asText(fallbackStatus);
+        String inForce = detail.path("inForce").asText(fallbackInForce);
+        String type = detail.path("type").asText(fallbackType);
         LocalDate promulgationDate = parseDate(detail.path("promulgation").asText(null));
         List<String> keywords = new ArrayList<>();
         if (detail.has("keywords")) {
             detail.get("keywords").forEach(node -> keywords.add(node.asText()));
         }
         List<DocumentFile> documents = extractDocuments(detail);
-        return Optional.of(new Act(eli, title, publisher, status, inForce, type, year, position, promulgationDate, keywords, documents));
+        return new Act(eli, title, publisher, status, inForce, type, year, position, promulgationDate, keywords, documents);
     }
+
+    public ConnectionTestResult performConnectionTest() {
+        try {
+            Optional<Act> sample = fetchAct("DU", 1997, 483);
+            if (sample.isEmpty()) {
+                return new ConnectionTestResult(false, "Brak danych dla testowej ustawy (DU/1997/483).");
+            }
+            Act act = sample.get();
+            String sampleTitle = act.getTitle();
+            if (sampleTitle == null || sampleTitle.isBlank()) {
+                sampleTitle = String.format("%s/%d/%d", act.getPublisherOrDefault(), act.getYear(), act.getPosition());
+            }
+            return new ConnectionTestResult(true, String.format("Połączono z ISAP. Przykładowa ustawa: %s", sampleTitle));
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return new ConnectionTestResult(false, "Test połączenia przerwany.");
+        } catch (IOException ex) {
+            return new ConnectionTestResult(false, "Błąd połączenia: " + ex.getMessage());
+        }
+    }
+
+    public record ConnectionTestResult(boolean success, String message) {}
 
     private List<DocumentFile> extractDocuments(JsonNode detail) {
         String address = detail.path("address").asText(null);
