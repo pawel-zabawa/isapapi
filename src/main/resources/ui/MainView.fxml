@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="pl.twojaFirma.ipapviewer.ui.MainController">
+    <top>
+        <ToolBar>
+            <Label text="Kategoria:" />
+            <ComboBox fx:id="categoryCombo" prefWidth="200" />
+            <Button fx:id="previousButton" text="Poprzednia" />
+            <Button fx:id="nextButton" text="Następna ustawa" />
+        </ToolBar>
+    </top>
+    <center>
+        <SplitPane fx:id="mainSplit" dividerPositions="0.55">
+            <items>
+                <TitledPane text="Treść aktu" collapsible="false">
+                    <content>
+                        <TextArea fx:id="actContent" wrapText="true" editable="false" />
+                    </content>
+                </TitledPane>
+                <TitledPane fx:id="summaryPane" collapsible="false">
+                    <content>
+                        <TextArea fx:id="summaryArea" wrapText="true" editable="false" />
+                    </content>
+                </TitledPane>
+            </items>
+        </SplitPane>
+    </center>
+    <right>
+        <TabPane prefWidth="300">
+            <tabs>
+                <Tab text="Panel Dev" closable="false">
+                    <content>
+                        <fx:include source="DevPanel.fxml" />
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </right>
+    <bottom>
+        <Label fx:id="statusLabel" text="Gotowy" padding="10" />
+    </bottom>
+</BorderPane>

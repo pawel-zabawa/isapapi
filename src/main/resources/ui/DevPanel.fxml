@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="pl.twojaFirma.ipapviewer.ui.DevPanelController" spacing="10" padding="10">
+    <children>
+        <Label text="Panel Deweloperski" styleClass="heading" />
+        <HBox spacing="5">
+            <Button fx:id="checkIpapButton" text="Sprawdź IPAP" />
+            <Label fx:id="ipapStatusLabel" text="IPAP: n/d" />
+        </HBox>
+        <HBox spacing="5">
+            <Button fx:id="checkOpenAiButton" text="Sprawdź OpenAI" />
+            <Label fx:id="openAiStatusLabel" text="OpenAI: n/d" />
+        </HBox>
+        <Label text="Logi" />
+        <TextArea fx:id="logsArea" prefRowCount="10" wrapText="true" />
+    </children>
+</VBox>

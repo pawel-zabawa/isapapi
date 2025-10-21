@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "date": {"type": "string", "format": "date"},
+          "categoryId": {"type": "string"},
+          "content": {"type": "string"}
+        },
+        "required": ["id", "title", "date", "categoryId"],
+        "additionalProperties": true
+      }
+    },
+    "nextCursor": {"type": ["string", "null"]}
+  },
+  "required": ["items"],
+  "additionalProperties": true
+}

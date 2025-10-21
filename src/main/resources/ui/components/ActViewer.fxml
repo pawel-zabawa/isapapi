@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" spacing="5">
+    <children>
+        <Label text="Treść aktu" />
+        <TextArea wrapText="true" prefRowCount="20" />
+    </children>
+</VBox>
