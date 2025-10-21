@@ -1,5 +1,6 @@
-package com.example.isap;
+package com.example.isap.ui;
 
+import com.example.isap.AppConfig;
 import com.example.isap.model.Act;
 import com.example.isap.service.ActContentService;
 import com.example.isap.service.ActFeedService;
@@ -213,7 +214,4 @@ public class App extends Application {
         thread.start();
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
 }
